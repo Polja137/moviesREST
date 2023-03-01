@@ -30,7 +30,8 @@ app.use(morgan("common"));
 app.get('/', (req, res) => {
   res.send('Welcome to my movie API!');
   });
-  
+
+  //add user if not existent
   app.post('/users', (req, res) => {
     Users.findOne({ Name: req.body.Name })
       .then((user) => {
@@ -104,10 +105,10 @@ app.get('/', (req, res) => {
   });
   
   
-    // Add a movie to a user's list of favorites
-  app.post('/users/:Name/movies/:Title', (req, res) => {
+  // Add a movie to a user's list of favorites
+  app.post('/users/:Name/movies/:MovieID', (req, res) => {
     Users.findOneAndUpdate({ Name: req.params.Name }, {
-       $push: { FavMovies: req.params.Title }
+       $push: { FavoriteMovies: req.params.MovieID }
      },
      { new: true }, // This line makes sure that the updated document is returned
     (err, updatedUser) => {
@@ -120,11 +121,37 @@ app.get('/', (req, res) => {
     });
   });  
   
+  // Add a movie
+app.post("/movies", (req, res) => {
+  Movies.create({
+      Title: req.body.Title,
+      Description: req.body.Description,
+      Genre: {
+          Name: req.body.Genre.Name,
+          Description: req.body.Genre.Description,
+      },
+      Director: {
+          Name: req.body.Director.Name,
+          Description: req.body.Director.Description,
+          Birth:req.body.Director.Birth
+      },
+      Actors: req.body.Actors,
+      Featured: req.body.Featured,
+      ImagePath: req.body.ImagePath,
+  })
+      .then((movie) => {
+          res.status(201).json(movie);
+      })
+      .catch((error) => {
+          console.error(error);
+          res.status(500).send("Error: " + error);
+      });
+});
   
   // DELETE a movie to a user's list of favorites
-  app.delete('/users/:Name/movies/:Title', (req, res) => {
+  app.delete('/users/:Name/movies/:MovieID', (req, res) => {
     Users.findOneAndUpdate({ Name: req.params.Name }, {
-       $pull: { FavMovies: req.params.Title }
+       $pull: { FavoriteMovies: req.params.MovieID }
      },
      { new: true }, // This line makes sure that the updated document is returned
     (err, updatedUser) => {
