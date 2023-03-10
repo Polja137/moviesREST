@@ -1,16 +1,19 @@
 const express=require("express");
 const app=express();
+const cors = require('cors');
+app.use(cors());
+let auth = require('./auth')(app);
 const bodyParser=require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 uuid=require('uuid');
-
+const { check, validationResult } = require('express-validator');
 const morgan = require("morgan");
 const mongoose = require('mongoose');
 const fs = require("fs");
 const path = require("path");
 const Models = require('./models.js');
-let auth = require('./auth')(app);
+
 const passport = require('passport');
 require('./passport');
 
@@ -34,7 +37,25 @@ app.get('/', (req, res) => {
   });
 
   //add user if not existent
-  app.post('/users', (req, res) => {
+  app.post('/users',
+  
+  [
+    check('Username', 'Username is required').isLength({min: 5}),
+    check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
+    check('Password', 'Password is required').not().isEmpty(),
+    check('Email', 'Email does not appear to be valid').isEmail()
+  ],
+  (req, res) => {
+
+  // check the validation object for errors
+  let errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
+
+
+    let hashedPassword = Users.hashPassword(req.body.Password);
     Users.findOne({ Username: req.body.Username})
       .then((user) => {
         if (user) {
@@ -43,7 +64,7 @@ app.get('/', (req, res) => {
           Users
             .create({
               Username: req.body.Username,
-              Password: req.body.Password,
+              Password: hashedPassword,
               Email: req.body.Email,
               Birthday: req.body.Birthday,
               FavoriteMovies: req.body.FavoriteMovies
@@ -208,9 +229,9 @@ app.post("/movies",  passport.authenticate('jwt', { session: false }), (req, res
       });
   });
   
-  // Get a Movie by Genre
+  // Get info about genre
   app.get('/movies/genre/:genreName', passport.authenticate('jwt', { session: false }),(req, res) => {
-    Movies.findOne({ 'Genre.Name': req.params.genreName })
+    Movies.find({ 'Genre.Name': req.params.genreName })
       .then((movie) => {
         res.json(movie.Genre);
       })
@@ -220,9 +241,9 @@ app.post("/movies",  passport.authenticate('jwt', { session: false }), (req, res
       });
   });
   
-  // Get a Movie by Director
+  // Get info about director
   app.get('/movies/directors/:Name',  passport.authenticate('jwt', { session: false }),(req, res) => {
-    Movies.findOne({ 'Director.Name': req.params.Director })
+    Movies.findOne({ 'Director.Name': req.params.Name })
       .then((movie) => {
         res.json(movie.Director);
       })
@@ -243,4 +264,10 @@ app.post("/movies",  passport.authenticate('jwt', { session: false }), (req, res
   res.status(500).send('There was an error. Please try again later.');
   });
 
-app.listen(8080,()=>console.log("listening on 8080"));
+
+//listen on the following port for other users
+  const port = process.env.PORT || 8080;
+  app.listen(port, '0.0.0.0',() => {
+   console.log('Listening on Port ' + port);
+  });
+
