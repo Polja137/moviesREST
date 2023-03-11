@@ -22,12 +22,14 @@ const Users = Models.User;
 //const Genres=Models.Genre;
 //const Directors=Models.Director;
 
-//Integrationg Mongoose with RESTAPI test 
-mongoose.connect('mongodb://127.0.0.1:27017/test', { useNewUrlParser: true, useUnifiedTopology: true });
+//Integrationg Mongoose with RESTAPI test (local)
+//mongoose.connect('mongodb://127.0.0.1:27017/test', { useNewUrlParser: true, useUnifiedTopology: true });
 
+//Integrationg Mongoose with RESTAPI test (online)
+mongoose.connect( process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+//mongoose.connect('mongodb+srv://olja:1234567Aa@cluster0.qrw3ovt.mongodb.net/myFlixDB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
 
 //log requests to server
-
 app.use(morgan("common"));
 //app.use(express.static('public'));
 
