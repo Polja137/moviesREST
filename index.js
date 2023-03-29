@@ -2,7 +2,7 @@ const express=require("express");
 const app=express();
 const cors = require('cors');
 app.use(cors());
-let auth = require('./auth')(app);
+
 const bodyParser=require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -15,12 +15,18 @@ const path = require("path");
 const Models = require('./models.js');
 
 const passport = require('passport');
+require('dotenv').config();//tried to resolve the mongoose.connect error 
 require('./passport');
+require('./auth')(app);
+
 
 const Movies = Models.Movie;
 const Users = Models.User;
 //const Genres=Models.Genre;
 //const Directors=Models.Director;
+
+//try to solve mongoose error
+mongoose.set("strictQuery", false);
 
 //Integrationg Mongoose with RESTAPI test (local)
 //mongoose.connect('mongodb://127.0.0.1:27017/test', { useNewUrlParser: true, useUnifiedTopology: true });
@@ -38,9 +44,14 @@ app.get('/', (req, res) => {
   res.send('Welcome to my movie API!');
   });
 
+
+  //Documentation
+  app.get('/docs',(req,res)=>
+  {res.sendFile('/public/documentation.html')});
+
+
   //add user if not existent
   app.post('/users',
-  
   [
     check('Username', 'Username is required').isLength({min: 5}),
     check('Username', 'Username contains non alphanumeric characters - not allowed.').isAlphanumeric(),
@@ -130,11 +141,9 @@ app.get('/', (req, res) => {
   });
   
   
-  // Add a movie to a user's list of favorites
+// Add a movie to a user's list of favorites
   app.post('/users/:Name/movies/:MovieID', passport.authenticate('jwt', { session: false }), (req, res) => {
-    Users.findOneAndUpdate({ Name: req.params.Username }, {
-       $push: { FavoriteMovies: req.params.MovieID }
-     },
+    Users.findOneAndUpdate({ Name: req.params.Username }, {$push: { FavoriteMovies: req.params.MovieID }},
      { new: true }, // This line makes sure that the updated document is returned
     (err, updatedUser) => {
       if (err) {
@@ -146,8 +155,8 @@ app.get('/', (req, res) => {
     });
   });  
   
-  // Add a movie
-app.post("/movies",  passport.authenticate('jwt', { session: false }), (req, res) => {
+// Add a movie
+app.post("/movies", (req, res) => {
   Movies.create({
       Title: req.body.Title,
       Description: req.body.Description,
