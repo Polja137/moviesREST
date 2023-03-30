@@ -32,8 +32,8 @@ mongoose.set("strictQuery", false);
 //mongoose.connect('mongodb://127.0.0.1:27017/test', { useNewUrlParser: true, useUnifiedTopology: true });
 
 //Integrationg Mongoose with RESTAPI test (online)
-// mongoose.connect( process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-mongoose.connect('mongodb+srv://olja:1234567Aa@cluster0.qrw3ovt.mongodb.net/myFlixDB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect( process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+// mongoose.connect('mongodb+srv://olja:1234567Aa@cluster0.qrw3ovt.mongodb.net/myFlixDB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
 
 //log requests to server
 app.use(morgan("common"));
@@ -46,8 +46,14 @@ app.get('/', (req, res) => {
 
 
   //Documentation
-app.get('/docs',(req,res) => {res.sendFile('/public/documentation.html')});
+app.get('/docs',(req,res) => {
+  console.log("THis is the path", path.join(__dirname,'public/documentation.html'));
+  res.sendFile(path.join(__dirname,'public/documentation.html'));
+});
 
+  //GET documentation
+  //app.get('/documentation', (req, res) => {                  
+   // res.sendFile('public/documentation.html', { root: __dirname });});
 
   //add user if not existent
   app.post('/users',
@@ -263,7 +269,7 @@ app.post("/movies", (req, res) => {
       });
   }); 
     
-    
+  //GET documentation
   app.get('/documentation', (req, res) => {                  
   res.sendFile('public/documentation.html', { root: __dirname });
   });
