@@ -33,10 +33,6 @@ mongoose.set("strictQuery", false);
 
 //Integrationg Mongoose with RESTAPI test (online)
 mongoose.connect( process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-<<<<<<< HEAD
-=======
-// mongoose.connect('mongodb+srv://olja:1234567Aa@cluster0.qrw3ovt.mongodb.net/myFlixDB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
->>>>>>> 0aebe8ac13151c59672242a22922e77abfd84127
 
 //log requests to server
 app.use(morgan("common"));
@@ -164,7 +160,7 @@ app.get('/docs',(req,res) => {
   });  
   
 // Add a movie
-app.post("/movies", (req, res) => {
+app.post("/movies", passport.authenticate('jwt', { session: false }),(req, res) => {
   Movies.create({
       Title: req.body.Title,
       Description: req.body.Description,
