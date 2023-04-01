@@ -33,7 +33,6 @@ mongoose.set("strictQuery", false);
 
 //Integrationg Mongoose with RESTAPI test (online)
 mongoose.connect( process.env.CONNECTION_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-//mongoose.connect('mongodb+srv://olja:1234567Aa@cluster0.qrw3ovt.mongodb.net/myFlixDB?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
 
 //log requests to server
 app.use(morgan("common"));
